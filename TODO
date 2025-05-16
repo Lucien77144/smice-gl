@@ -1,0 +1,19 @@
+# Fonctionnalités à implémenter
+
+## Debug
+
+- [ ] Ajouter un debug pour les audios
+- [ ] Désactiver les interactions pour les debugObjects
+
+## Contrôles
+
+- [ ] Ajouter l'orbit control
+
+## Documentation & Typage
+
+- [ ] Ajouter du typage sur les data des sources
+- [ ] Créer une documentation sur l'utilisation des sources
+
+## Rendu 3D
+
+- [ ] Implémenter les text3D
