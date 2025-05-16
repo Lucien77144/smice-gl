@@ -146,9 +146,13 @@ export type TSceneEvents = {
  * @method removeCSS3D Remove CSS3D from the item
  */
 export default class ExtendableScene<
-	T extends ExtendableItem | ExtendableScene =
-		| ExtendableItem
-		| ExtendableScene<any>
+	T extends {
+		parent?: ExtendableItem | ExtendableScene<any>
+		shader?: ExtendableShader
+	} = {
+		parent?: ExtendableItem | ExtendableScene<any>
+		shader?: ExtendableShader
+	}
 > extends EventEmitter<TSceneEvents> {
 	// --------------------------------
 	// Public properties
@@ -172,7 +176,7 @@ export default class ExtendableScene<
 	/**
 	 * Parent scene if exists
 	 */
-	public parent?: T
+	public parent?: T['parent']
 	/**
 	 * Scene components
 	 */
@@ -224,7 +228,7 @@ export default class ExtendableScene<
 	/**
 	 * Shader applied to the scene
 	 */
-	public shader?: ExtendableShader
+	public shader?: T['shader']
 	/**
 	 * Shader transition
 	 */
@@ -261,14 +265,16 @@ export default class ExtendableScene<
 	// --------------------------------
 	// Private properties
 	// --------------------------------
+	#name!: string
 	#css2dManager?: CSS2DManager
 	#css3dManager?: CSS3DManager
 	#debug: Experience['debug']
+	#cursor: 'pointer' | 'grab' | ''
 
 	/**
 	 * Constructor
 	 */
-	constructor() {
+	constructor({ name }: { name?: string } = {}) {
 		super()
 
 		// Protected
@@ -285,8 +291,10 @@ export default class ExtendableScene<
 
 		// Private
 		this.#debug = this.experience.debug
+		this.#cursor = ''
 
 		// Public
+		this.name = name ?? this.constructor.name
 		this.isActive = false
 		this.wireframe = false
 		this.scene = this.#setScene()
@@ -303,7 +311,6 @@ export default class ExtendableScene<
 		this.on('mousedown', this.#onMouseDown.bind(this))
 		this.on('mouseup', this.#onMouseUp.bind(this))
 		this.on('mousemove', this.#onMouseMove.bind(this))
-		this.on('scroll', this.#onScroll.bind(this))
 		this.on('load', this.#onLoad.bind(this))
 		this.on('ready', this.#onReady.bind(this))
 		this.on('update', this.#onUpdate.bind(this))
@@ -320,7 +327,15 @@ export default class ExtendableScene<
 	 * @returns Name of the scene
 	 */
 	public get name(): string {
-		return this.constructor.name
+		return this.#name
+	}
+
+	/**
+	 * Set the name of the scene
+	 * @param name Name of the scene
+	 */
+	public set name(name: string) {
+		this.#name = name
 	}
 
 	/**
@@ -345,6 +360,20 @@ export default class ExtendableScene<
 	 */
 	public get environment(): Texture | undefined {
 		return this.scene.environment as Texture | undefined
+	}
+
+	/**
+	 * Get the cursor style
+	 */
+	public get cursor() {
+		return this.#cursor
+	}
+
+	/**
+	 * Set the cursor
+	 */
+	public set cursor(value) {
+		this.#cursor = value
 	}
 
 	// --------------------------------
@@ -479,9 +508,9 @@ export default class ExtendableScene<
 			this.hovered = hovered
 			this.hovered?.trigger('mouseenter')
 		}
+
 		// Get holded item hovered
 		const holded = this.#getRaycastedItem(event.centered, ['hold'])?.item
-		// If user leave the hold item, reset the holded item
 		if (this.holded?.item?.id !== holded?.item?.id) {
 			this.#resetHoldedItem()
 		}
@@ -493,6 +522,7 @@ export default class ExtendableScene<
 	 */
 	#onScroll(event: TScrollEvent): void {
 		// Trigger scroll on all components
+		this.trigger('scroll', event)
 		Object.values(this.allComponents).forEach((c) => c.trigger('scroll', event))
 	}
 
@@ -510,6 +540,9 @@ export default class ExtendableScene<
 	#onUpdate(): void {
 		// Trigger update on all components
 		Object.values(this.allComponents).forEach((c) => c.trigger('update'))
+
+		// Set the cursor
+		this.#setCursor()
 
 		// Update camera
 		this.camera.update()
@@ -565,6 +598,7 @@ export default class ExtendableScene<
 
 		// Dispose scene
 		this.scene.clear()
+		this.scene.removeFromParent()
 		this.scrollManager.dispose()
 		this.camera.dispose()
 		this.rt.dispose()
@@ -585,7 +619,7 @@ export default class ExtendableScene<
 		this.#addItemsToScene()
 
 		// Flatten scenes & trigger load on all scenes if there is no parent
-		this.allScenes = this.#flattenScenes(this.scenes)
+		this.allScenes = this.#flattenScenes({ [this.name]: this })
 
 		// Add audios to the scene
 		this.audios && this.camera.addAudios(this.audios, this.scene)
@@ -603,6 +637,31 @@ export default class ExtendableScene<
 	// --------------------------------
 	// Private Functions
 	// --------------------------------
+
+	/**
+	 * Get all components scenes
+	 * @returns All components scenes
+	 */
+	#getAllComponentsScenes(scene: ExtendableScene): Dictionary<ExtendableScene> {
+		const allComps = Object.values(scene.allComponents)
+		return allComps.reduce((acc, c) => {
+			return { ...acc, ...c.scenes }
+		}, {})
+	}
+
+	/**
+	 * Set the cursor values
+	 */
+	#setCursor() {
+		const centered = this.cursorManager.centered
+		if (this.#getRaycastedItem(centered, ['click'])) {
+			this.cursor = 'pointer'
+		} else if (this.#getRaycastedItem(centered, ['hold'])) {
+			this.cursor = 'grab'
+		} else {
+			this.cursor = ''
+		}
+	}
 
 	/**
 	 * Set scene
@@ -745,7 +804,7 @@ export default class ExtendableScene<
 		// Set wireframe debug
 		this.debugFolder
 			.addBinding(this, 'wireframe', {
-				tag: `wireframe_${this.name}`,
+				tag: `wireframe_${this.name?.toLowerCase()?.replaceAll(' ', '_')}`,
 			})
 			.on('change', () =>
 				this.scene.traverse((c: any) => {
@@ -956,8 +1015,8 @@ export default class ExtendableScene<
 			// Set the parent scene
 			scene.parent = parent || this
 
-			// Trigger load event on the scene (only if this is the master scene to prevent multiple trigger)
-			if (!this.parent) {
+			// Trigger load event on the scene (if this is not the master scene)
+			if (scene.name !== this.parent?.name) {
 				scene.trigger('load')
 			}
 
@@ -966,15 +1025,12 @@ export default class ExtendableScene<
 				const oldKey = key
 				key = `${key}-${scene.id}`
 
-				const warn_msg = `Component name '${oldKey}' already exists, renamed to '${key}'`
-				console.warn(warn_msg)
+				const warn_msg = `Scene name '${oldKey}' already exists, renamed to '${key}'`
+				console.warn(warn_msg, scene)
 			}
 
 			// Flatten the scenes
-			const allComps = Object.values(scene.allComponents)
-			const allCompsScenes = allComps.reduce((acc, c) => {
-				return { ...acc, ...c.scenes }
-			}, {})
+			const allCompsScenes = this.#getAllComponentsScenes(scene)
 			res = {
 				...res,
 				...this.#flattenScenes(allCompsScenes, scene),

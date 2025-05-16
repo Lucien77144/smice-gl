@@ -3,7 +3,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
-import { LottieLoader } from 'three/examples/jsm/loaders/LottieLoader.js'
 import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import type { TLocale } from '~/models/modules/locale.model.js'
@@ -23,10 +22,12 @@ import {
 	Mesh,
 	MeshBasicMaterial,
 	Object3D,
+	MeshStandardMaterial,
 	ShapeGeometry,
 	Texture,
 } from 'three'
 import { get3DSize } from '~/utils/functions/getSize.js'
+import { AnimationItem } from 'lottie-web'
 
 export type TLoaderEvents = {
 	loadingFileEnd: (event: {
@@ -255,6 +256,43 @@ export default class Loader extends EventEmitter<TLoaderEvents> {
 		// GLTF
 		const gltfLoader = new GLTFLoader()
 		gltfLoader.setDRACOLoader(dracoLoader)
+		gltfLoader.register((parser) => {
+			return {
+				name: 'KHR_materials_pbrSpecularGlossiness',
+				getMaterialType: () => MeshStandardMaterial,
+				extendParams: (materialParams: any, materialDef: any, parser: any) => {
+					const pbrSpecularGlossiness = materialDef.extensions.KHR_materials_pbrSpecularGlossiness
+					let texturePromise: Promise<void> | undefined
+
+					materialParams.color = new Color(1.0, 1.0, 1.0)
+					materialParams.opacity = 1.0
+
+					if (Array.isArray(pbrSpecularGlossiness.diffuseFactor)) {
+						const array = pbrSpecularGlossiness.diffuseFactor
+						materialParams.color.fromArray(array)
+						materialParams.opacity = array[3]
+					}
+
+					if (pbrSpecularGlossiness.diffuseTexture !== undefined) {
+						texturePromise = parser.assignTexture(materialParams, 'map', pbrSpecularGlossiness.diffuseTexture)
+					}
+
+					materialParams.glossiness = pbrSpecularGlossiness.glossinessFactor !== undefined ? pbrSpecularGlossiness.glossinessFactor : 1.0
+					materialParams.specular = new Color(1.0, 1.0, 1.0)
+
+					if (Array.isArray(pbrSpecularGlossiness.specularFactor)) {
+						materialParams.specular.fromArray(pbrSpecularGlossiness.specularFactor)
+					}
+
+					if (pbrSpecularGlossiness.specularGlossinessTexture !== undefined) {
+						const specGlossMapDef = pbrSpecularGlossiness.specularGlossinessTexture
+						texturePromise = parser.assignTexture(materialParams, 'specularGlossinessMap', specGlossMapDef)
+					}
+
+					return texturePromise
+				}
+			}
+		})
 
 		this.#loaders.push({
 			extensions: ['glb', 'gltf'],
@@ -335,14 +373,33 @@ export default class Loader extends EventEmitter<TLoaderEvents> {
 		})
 
 		// Lottie
-		const lottieLoader = new LottieLoader()
-
 		this.#loaders.push({
 			extensions: ['lottie.json'],
 			action: (resource) => {
-				lottieLoader.load(resource.source, (animation) => {
-					this.#fileLoadEnd(resource, animation)
-				})
+				import('lottie-web').then((lottie) => {
+					const container = document.createElement('div');
+					const animation = lottie.default.loadAnimation({
+						container,
+						renderer: 'canvas',
+						loop: true,
+						autoplay: false,
+						path: resource.source
+					}) as AnimationItem;
+
+					// Create a canvas texture from the animation
+					const canvas = container.querySelector('canvas');
+					if (canvas) {
+						const texture = new Texture(canvas);
+						texture.needsUpdate = true;
+						
+						// Update texture on each frame
+						animation.addEventListener('enterFrame', () => {
+							texture.needsUpdate = true;
+						});
+
+						this.#fileLoadEnd(resource, texture);
+					}
+				});
 			},
 		})
 

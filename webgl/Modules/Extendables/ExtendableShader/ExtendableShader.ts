@@ -16,7 +16,7 @@ export type TExtendableUniforms = {
 
 export default class ExtendableShader {
 	// Public
-	public scene: ExtendableScene
+	public scene: ExtendableScene<any>
 	public uniforms: TExtendableUniforms
 	public shaderMaterial!: ShaderMaterial
 
@@ -164,6 +164,7 @@ export default class ExtendableShader {
 			fragmentShader,
 			uniforms: this.uniforms,
 			transparent: true,
+			dithering: true,
 		})
 	}
 

@@ -1,6 +1,7 @@
 import {
 	ACESFilmicToneMapping,
 	Color,
+	HalfFloatType,
 	PerspectiveCamera,
 	ShaderMaterial,
 	SRGBColorSpace,
@@ -195,13 +196,16 @@ export default class Renderer {
 			transparent: true,
 		})
 
-		// Set shader pass
-		this.shaderPass = new ShaderPass(this.renderShader)
-
 		// Set composer
 		this.composer = new EffectComposer(this.instance, {
 			alpha: true,
+			frameBufferType: HalfFloatType,
 		})
+
+		// Set shader pass
+		this.shaderPass = new ShaderPass(this.renderShader)
+
+		// Add main shader pass
 		this.composer.addPass(this.shaderPass)
 	}
 
@@ -282,6 +286,7 @@ export default class Renderer {
 		this.camera.updateProjectionMatrix()
 		this.instance.setSize(this.#viewport.width, this.#viewport.height)
 		this.instance.setPixelRatio(this.#viewport.dpr)
+		this.composer.setSize(this.#viewport.width, this.#viewport.height)
 	}
 
 	/**
@@ -294,9 +299,7 @@ export default class Renderer {
 		this.shaderPass?.dispose()
 
 		// Dispose render targets
-		this.#renderList.forEach((item) => {
-			item.rt?.dispose()
-		})
+		this.#renderList.forEach((item) => item.rt?.dispose())
 
 		// Clear any textures and programs
 		this.instance.info.programs?.forEach((program) => {

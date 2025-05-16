@@ -8,14 +8,11 @@ export type TSceneInfos = {
 	id: number
 	isDefault?: boolean
 	name: string
-	Scene: { new (): ExtendableScene }
+	Scene: { new (): ExtendableScene<any> }
 	nav?: {
 		scale: number
 		start?: number
 		end?: number
-	}
-	transition?: {
-		duration: number
 	}
 }
 
