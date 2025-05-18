@@ -1,19 +1,5 @@
 @use 'sass:color';
 
-// CSS Variables
-body,
-html {
-  --primary: #4b7cfb;
-  --secondary: #f5e5e0;
-  --body: rgb(247, 251, 255);
-  --black: #151515;
-  --white: #f4f4f4;
-  --success: #00ff00;
-  --info: #00ccff;
-  --warning: #ffcc00;
-  --danger: #ff0000;
-}
-
 // Sass Colors Variables
 $darken-amount: -10%;
 $lighten-amount: 10%;
