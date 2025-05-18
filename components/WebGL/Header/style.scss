@@ -1,0 +1,24 @@
+.header {
+  &-logo {
+    object-fit: contain;
+
+    &.default {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 50vw;
+      top: 50%;
+      left: 50%;
+    }
+  }
+
+  &-container {
+    position: fixed;
+    z-index: 999;
+    width: 100vw;
+
+    &.default {
+      height: 100vh;
+      background-color: $black;
+    }
+  }
+}

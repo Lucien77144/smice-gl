@@ -1,0 +1,21 @@
+.rainbow-button {
+  --color-1: #{$primary};
+  --color-2: transparent;
+  --color-3: #{$primary};
+  --color-4: transparent;
+  --color-5: #{$primary};
+  animation: rainbow var(--speed) infinite linear;
+}
+
+.rainbow-button:before {
+  animation: rainbow var(--speed) infinite linear;
+}
+
+@keyframes rainbow {
+  0% {
+    background-position: 0;
+  }
+  100% {
+    background-position: 200%;
+  }
+}

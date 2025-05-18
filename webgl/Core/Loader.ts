@@ -1,5 +1,5 @@
 import Experience from '../Experience.js'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
@@ -27,7 +27,6 @@ import {
 	Texture,
 } from 'three'
 import { get3DSize } from '~/utils/functions/getSize.js'
-import { AnimationItem } from 'lottie-web'
 
 export type TLoaderEvents = {
 	loadingFileEnd: (event: {
@@ -48,6 +47,7 @@ export default class Loader extends EventEmitter<TLoaderEvents> {
 
 	// Private
 	#experience: Experience
+	#renderer: Experience['renderer']
 	#loaders: Array<TLoader>
 	#store: Experience['store']
 	private $bus: Experience['$bus']
@@ -68,6 +68,7 @@ export default class Loader extends EventEmitter<TLoaderEvents> {
 
 		// Private
 		this.#experience = new Experience()
+		this.#renderer = this.#experience.renderer
 		this.#loaders = []
 		this.#store = this.#experience.store
 		this.$bus = this.#experience.$bus
@@ -384,7 +385,7 @@ export default class Loader extends EventEmitter<TLoaderEvents> {
 						loop: true,
 						autoplay: false,
 						path: resource.source
-					}) as AnimationItem;
+					});
 
 					// Create a canvas texture from the animation
 					const canvas = container.querySelector('canvas');
@@ -522,10 +523,17 @@ export default class Loader extends EventEmitter<TLoaderEvents> {
 	/**
 	 * File load end
 	 */
-	#fileLoadEnd(resource: TResourceFile['resource'], data: TResourceData): void {
+	async #fileLoadEnd(resource: TResourceFile['resource'], data: TResourceData): Promise<void> {
 		this.loaded++
 		this.items ??= {}
 		this.items[resource.name] = data
+
+		if ((data as GLTF).scene) {
+			await new Promise<void>(async (resolve) => {
+				await this.#renderer.preRender(data as GLTF)
+				window.requestAnimationFrame(() => resolve())
+			})
+		}
 
 		this.trigger('loadingFileEnd', { resource, data })
 

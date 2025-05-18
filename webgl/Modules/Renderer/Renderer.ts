@@ -16,6 +16,7 @@ import { EffectComposer, ShaderPass } from 'postprocessing'
 import vertexShader from './shaders/vertexShader.vert?raw'
 import fragmentShader from './shaders/fragmentShader.frag?raw'
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js'
+import type { GLTF } from 'three/examples/jsm/Addons.js'
 
 type TClearColor = {
 	color: string
@@ -92,6 +93,16 @@ export default class Renderer {
 	public setRenderTarget(rt?: WebGLRenderTarget) {
 		this.instance.setRenderTarget(rt ?? null)
 		this.instance.clear()
+	}
+
+	/**
+	 * Pre-render
+	 */
+	public async preRender(gltf: GLTF): Promise<void> {
+		await new Promise((resolve) => {
+			this.instance.render(gltf.scene, this.camera)
+			window.requestAnimationFrame(() => resolve(true))
+		})
 	}
 
 	// --------------------------------
@@ -294,12 +305,9 @@ export default class Renderer {
 	 */
 	public dispose() {
 		// Dispose post-processing
-		this.composer?.dispose()
-		this.renderShader?.dispose()
-		this.shaderPass?.dispose()
-
-		// Dispose render targets
-		this.#renderList.forEach((item) => item.rt?.dispose())
+		this.renderShader.dispose()
+		this.composer.dispose()
+		this.#renderList.forEach((s) => s.rt?.dispose())
 
 		// Clear any textures and programs
 		this.instance.info.programs?.forEach((program) => {

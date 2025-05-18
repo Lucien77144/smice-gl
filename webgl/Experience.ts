@@ -140,8 +140,8 @@ export default class Experience {
 		}
 
 		// Set elements
-		this.resources = new Resources()
 		this.renderer = new Renderer()
+		this.resources = new Resources()
 		this.keysManager = new KeysManager()
 		this.sceneManager = new SceneManager()
 		this.raycaster = new Raycaster()

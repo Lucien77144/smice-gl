@@ -3,16 +3,15 @@
 // CSS Variables
 body,
 html {
-	--primary: #4b7cfb;
-	--secondary: #f5e5e0;
-	--beige: #efdbd4;
-	--beige-sky: #f1dad2;
-	--black: #151515;
-	--white: #f4f4f4;
-	--success: #00ff00;
-	--info: #00ccff;
-	--warning: #ffcc00;
-	--danger: #ff0000;
+  --primary: #4b7cfb;
+  --secondary: #f5e5e0;
+  --body: rgb(247, 251, 255);
+  --black: #151515;
+  --white: #f4f4f4;
+  --success: #00ff00;
+  --info: #00ccff;
+  --warning: #ffcc00;
+  --danger: #ff0000;
 }
 
 // Sass Colors Variables
@@ -27,13 +26,9 @@ $secondary: #f5e5e0;
 $secondary-dark: color.adjust($secondary, $lightness: $darken-amount);
 $secondary-light: color.adjust($secondary, $lightness: $lighten-amount);
 
-$beige: #efdbd4;
-$beige-dark: color.adjust($beige, $lightness: $darken-amount);
-$beige-light: color.adjust($beige, $lightness: $lighten-amount);
-
-$beige-sky: #f1dad2;
-$beige-sky-dark: color.adjust($beige-sky, $lightness: $darken-amount);
-$beige-sky-light: color.adjust($beige-sky, $lightness: $lighten-amount);
+$body: #efdbd4;
+$body-dark: color.adjust($body, $lightness: $darken-amount);
+$body-light: color.adjust($body, $lightness: $lighten-amount);
 
 $black: #151515;
 $black-dark: color.adjust($black, $lightness: $darken-amount);

@@ -178,10 +178,13 @@ export default class SceneManager {
 	 * Add elements to render list
 	 * @param list Elements to add
 	 */
-	#addToRenderList(scene: ExtendableScene): void {
+	 #addToRenderList(scene: ExtendableScene): void {
 		if (!this.renderList.find((s) => s.id === scene.id)) {
-			this.renderList.push(...Object.values(scene.allScenes), scene)
-			scene.isActive = true
+			const toAdd = [...Object.values(scene.allScenes), scene]
+			toAdd.forEach((s) => {
+				s.isActive = true
+				this.renderList.push(s)
+			})
 		}
 	}
 

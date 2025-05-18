@@ -158,8 +158,12 @@ export default class ExtendableScene<
 	// Public properties
 	// --------------------------------
 	/**
-	 * Active state
+	 * Ready state
 	 */
+	public isReady: boolean
+	/**
+	 * Active state
+	*/
 	public isActive: boolean
 	/**
 	 * Three.js scene
@@ -295,6 +299,7 @@ export default class ExtendableScene<
 
 		// Public
 		this.name = name ?? this.constructor.name
+		this.isReady = false
 		this.isActive = false
 		this.wireframe = false
 		this.scene = this.#setScene()
@@ -531,6 +536,7 @@ export default class ExtendableScene<
 	 */
 	#onReady(): void {
 		// Trigger onInitComplete on all components
+		this.isReady = true
 		Object.values(this.allComponents).forEach((c) => c.trigger('ready'))
 	}
 
@@ -631,7 +637,7 @@ export default class ExtendableScene<
 		this.#setEvents()
 
 		// Trigger ready event on all components
-		Object.values(this.allComponents).forEach((c) => c.trigger('ready'))
+		this.trigger('ready')
 	}
 
 	// --------------------------------

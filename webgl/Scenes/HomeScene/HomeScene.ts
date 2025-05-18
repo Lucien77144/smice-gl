@@ -1,16 +1,13 @@
 import { AmbientLight, Color, Light, Texture, Vector3 } from 'three'
 import ExtendableScene from '../../Modules/Extendables/ExtendableScene'
-import Garland from './Items/Garland'
 import type { Dictionary } from '~/models/functions/dictionary.model'
 import TransitionSlide from '~/webgl/Modules/Transitions/TransitionSlide/TransitionSlide'
 import { ShaderHomeBackground } from '~/webgl/Modules/Shaders/ShaderHomeBackground/ShaderHomeBackground'
-import type Picture from './Items/Picture/Picture'
 
 export default class HomeScene extends ExtendableScene<{
 	shader: ShaderHomeBackground
 }> {
 	// Public
-	public activeItem!: Picture
 
 	/**
 	 * Constructor
@@ -19,7 +16,6 @@ export default class HomeScene extends ExtendableScene<{
 		super()
 		// Childs
 		this.components = {
-			garland: new Garland(),
 		}
 
 		// Transition
@@ -35,24 +31,6 @@ export default class HomeScene extends ExtendableScene<{
 	// Public
 	// --------------------------------
 
-	/**
-	 * Set active item
-	 * @param item Item to set as active
-	 */
-	public setActiveItem(item: Picture, instant: boolean = false) {
-		// Set active item
-		this.activeItem = item
-
-		// Get colors
-		const colors = this.activeItem?.contentScene?.colors
-		if (!colors) return
-
-		// Change colors
-		this.shader!.changeColors(
-			colors.map((color) => new Color(color)),
-			instant
-		)
-	}
 
 	// --------------------------------
 	// Events
@@ -87,7 +65,6 @@ export default class HomeScene extends ExtendableScene<{
 	 * On update
 	 */
 	#onUpdate() {
-		this.shader!.setUniform('tItem', this.activeItem?.contentTexture)
 	}
 
 	// --------------------------------
