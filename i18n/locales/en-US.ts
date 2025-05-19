@@ -20,5 +20,10 @@ export default {
   },
 
   TITLE: 'Title',
+  SUBTITLE: 'Subtitle',
   LOGIN: 'Login',
+
+  QUALITY_STANDARDS_TITLE_1: 'Measure your quality standards,',
+  QUALITY_STANDARDS_TITLE_2: 'Improve',
+  QUALITY_STANDARDS_TITLE_3: 'your operational excellence',
 }

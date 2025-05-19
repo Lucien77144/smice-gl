@@ -20,5 +20,10 @@ export default {
   },
 
   TITLE: 'Titre',
+  SUBTITLE: 'Sous-titre',
   LOGIN: 'Connexion',
+
+  QUALITY_STANDARDS_TITLE_1: 'Mesurez vos standards qualité,',
+  QUALITY_STANDARDS_TITLE_2: 'Améliorer',
+  QUALITY_STANDARDS_TITLE_3: 'votre excellence opérationnelle',
 }

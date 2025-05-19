@@ -25,6 +25,14 @@
 			{
 				"name": "logo",
 				"source": "/img/logo.svg"
+			},
+			{
+				"name": "NexaHeavy",
+				"source": "/fonts/Nexa-Heavy.font.json"
+			},
+			{
+				"name": "NexaHeavyAtlas",
+				"source": "/fonts/Nexa-Heavy.png"
 			}
 		]
 	},

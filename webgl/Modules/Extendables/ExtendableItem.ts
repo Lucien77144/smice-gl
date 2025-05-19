@@ -1,11 +1,11 @@
 import {
-	BufferGeometry,
-	Group,
-	InstancedMesh,
-	Material,
-	Mesh,
-	Object3D,
-	type Intersection,
+  BufferGeometry,
+  Group,
+  InstancedMesh,
+  Material,
+  Mesh,
+  Object3D,
+  type Intersection,
 } from 'three'
 import Experience from '~/webgl/Experience'
 import type { Dictionary } from '~/models/functions/dictionary.model'
@@ -14,100 +14,100 @@ import type { ICSS2DRendererStore } from '~/models/stores/cssRenderer.store.mode
 import type ExtendableScene from './ExtendableScene'
 import type { FolderApi, Pane } from 'tweakpane'
 import {
-	DebugMaterial,
-	type TMaterialDebugOptions,
+  DebugMaterial,
+  type TMaterialDebugOptions,
 } from '../Debug/DebugMaterial'
 
 /**
  * Item events type
  */
 export type TItemsEvents = {
-	/**
-	 * On load
-	 * @description Called to load the item
-	 * @returns void
-	 */
-	load: () => void
+  /**
+   * On load
+   * @description Called to load the item
+   * @returns void
+   */
+  load: () => void
 
-	/**
-	 * On ready
-	 * @description Called when the scene is ready and transition is complete
-	 * @returns void
-	 */
-	ready: () => void
+  /**
+   * On ready
+   * @description Called when the scene is ready and transition is complete
+   * @returns void
+   */
+  ready: () => void
 
-	/**
-	 * On update
-	 * @description Called on each frame
-	 * @returns void
-	 */
-	update: () => void
+  /**
+   * On update
+   * @description Called on each frame
+   * @returns void
+   */
+  update: () => void
 
-	/**
-	 * On resize
-	 * @description Called when the window is resized
-	 * @returns void
-	 */
-	resize: () => void
+  /**
+   * On resize
+   * @description Called when the window is resized
+   * @returns void
+   */
+  resize: () => void
 
-	/**
-	 * On dispose
-	 * @description Called when the item is disposed
-	 * @returns void
-	 */
-	dispose: () => void
+  /**
+   * On dispose
+   * @description Called when the item is disposed
+   * @returns void
+   */
+  dispose: () => void
 
-	/**
-	 * On scroll
-	 * @description Called when the mouse scroll over the scene
-	 * @param event Mouse scroll event
-	 * @returns void
-	 */
-	scroll: (event: TScrollEvent) => void
+  /**
+   * On scroll
+   * @description Called when the mouse scroll over the scene
+   * @param event Mouse scroll event
+   * @returns void
+   */
+  scroll: (event: TScrollEvent) => void
 
-	/**
-	 * On mouse move
-	 * @description Called on mouse move over the scene
-	 * @param event Mouse event
-	 * @returns void
-	 */
-	mousemove: (event: TCursorProps) => void
+  /**
+   * On mouse move
+   * @description Called on mouse move over the scene
+   * @param event Mouse event
+   * @returns void
+   */
+  mousemove: (event: TCursorProps) => void
 
-	/**
-	 * On mouse enter
-	 * @description Called when the mouse enter the item
-	 * @returns void
-	 */
-	mouseenter: () => void
+  /**
+   * On mouse enter
+   * @description Called when the mouse enter the item
+   * @returns void
+   */
+  mouseenter: () => void
 
-	/**
-	 * On mouse hover
-	 * @description Called when the mouse is moving over the item
-	 * @returns void
-	 */
-	mousehover: (event: TCursorProps & { target: Intersection }) => void
+  /**
+   * On mouse hover
+   * @description Called when the mouse is moving over the item
+   * @returns void
+   */
+  mousehover: (event: TCursorProps & { target: Intersection }) => void
 
-	/**
-	 * On mouse leave
-	 * @description Called when the mouse leave the item
-	 * @returns void
-	 */
-	mouseleave: () => void
+  /**
+   * On mouse leave
+   * @description Called when the mouse leave the item
+   * @returns void
+   */
+  mouseleave: () => void
 
-	/**
-	 * On click
-	 * @description Called when the mouse click on the item
-	 * @returns void
-	 */
-	click: () => void
+  /**
+   * On click
+   * @description Called when the mouse click on the item
+   * @returns void
+   */
+  click: () => void
 
-	/**
-	 * On hold
-	 * @description Called when the mouse hold on the item
-	 * @param success Success of the hold
-	 * @returns void
-	 */
-	hold: (success: boolean) => void
+  /**
+   * On hold
+   * @description Called when the mouse hold on the item
+   * @param success Success of the hold
+   * @returns void
+   */
+  hold: (success: boolean) => void
 }
 
 /**
@@ -135,261 +135,261 @@ export type TItemsEvents = {
  * @method buildInstancedMesh Build instanced mesh
  */
 export default class ExtendableItem<
-	T extends ExtendableScene<any> = ExtendableScene<any>
+  T extends ExtendableScene<any> = ExtendableScene<any>
 > extends EventEmitter<TItemsEvents> {
-	// --------------------------------
-	// Public properties
-	// --------------------------------
-	/**
-	 * Parent scene of the item
-	 * @warning this is null in the constructor
-	 */
-	public scene?: T
-	/**
-	 * Parent component of the item
-	 * @warning this is null in the constructor
-	 */
-	public parent?: ExtendableItem<T> | ExtendableScene<T>
-	/**
-	 * Item that will be added to the three scene
-	 */
-	public item: Group
-	/**
-	 * Shild scenes of the item
-	 */
-	public scenes: Dictionary<ExtendableScene>
-	/**
-	 * Child components of the item
-	 * @description Will replace item by a group (including item) and add components to it
-	 */
-	public components: Dictionary<ExtendableItem>
-	/**
-	 * Object of audios to add to the item (positionnal audio)
-	 */
-	public audios?: Dictionary<TAudioParams>
-	/**
-	 * Debug folder
-	 */
-	public debugFolder?: FolderApi
-	/**
-	 * Scenes folder
-	 */
-	public scenesFolder?: FolderApi
-	/**
-	 * Duration after hold event is triggered
-	 */
-	public holdDuration: number
-	/**
-	 * Disable any functions of the item
-	 * @description Array of functions to disable
-	 */
-	public disabledFn: (keyof TItemsEvents)[]
-	/**
-	 * Ignore any functions of the item
-	 * @description Array of functions to disable, instead of disabledFn, this will not disable the function for child components.
-	 */
-	public ignoredFn: (keyof TItemsEvents)[]
+  // --------------------------------
+  // Public properties
+  // --------------------------------
+  /**
+   * Parent scene of the item
+   * @warning this is null in the constructor
+   */
+  public scene?: T
+  /**
+   * Parent component of the item
+   * @warning this is null in the constructor
+   */
+  public parent?: ExtendableItem<T> | ExtendableScene<T>
+  /**
+   * Item that will be added to the three scene
+   */
+  public item: Group
+  /**
+   * Shild scenes of the item
+   */
+  public scenes: Dictionary<ExtendableScene>
+  /**
+   * Child components of the item
+   * @description Will replace item by a group (including item) and add components to it
+   */
+  public components: Dictionary<ExtendableItem<any>>
+  /**
+   * Object of audios to add to the item (positionnal audio)
+   */
+  public audios?: Dictionary<TAudioParams>
+  /**
+   * Debug folder
+   */
+  public debugFolder?: FolderApi
+  /**
+   * Scenes folder
+   */
+  public scenesFolder?: FolderApi
+  /**
+   * Duration after hold event is triggered
+   */
+  public holdDuration: number
+  /**
+   * Disable any functions of the item
+   * @description Array of functions to disable
+   */
+  public disabledFn: (keyof TItemsEvents)[]
+  /**
+   * Ignore any functions of the item
+   * @description Array of functions to disable, instead of disabledFn, this will not disable the function for child components.
+   */
+  public ignoredFn: (keyof TItemsEvents)[]
 
-	// --------------------------------
-	// Protected properties
-	// --------------------------------
-	/**
-	 * Experience reference
-	 */
-	protected experience: Experience
-	/**
-	 * Resources reference
-	 */
-	protected resources: Experience['resources']['items']
-	/**
-	 * Tweakpane debug reference
-	 */
-	protected debug: Experience['debug']
+  // --------------------------------
+  // Protected properties
+  // --------------------------------
+  /**
+   * Experience reference
+   */
+  protected experience: Experience
+  /**
+   * Resources reference
+   */
+  protected resources: Experience['resources']['items']
+  /**
+   * Tweakpane debug reference
+   */
+  protected debug: Experience['debug']
 
-	// --------------------------------
-	// Private properties
-	// --------------------------------
-	/**
-	 * Name of the item
-	 */
-	#name!: string
+  // --------------------------------
+  // Private properties
+  // --------------------------------
+  /**
+   * Name of the item
+   */
+  #name!: string
 
-	/**
-	 * Constructor
-	 */
-	constructor({ name }: { name?: string } = {}) {
-		super()
+  /**
+   * Constructor
+   */
+  constructor({ name }: { name?: string } = {}) {
+    super()
 
-		// Protected
-		this.experience = new Experience()
-		this.resources = this.experience.resources.items
-		this.debug = this.experience.debug
+    // Protected
+    this.experience = new Experience()
+    this.resources = this.experience.resources.items
+    this.debug = this.experience.debug
 
-		// Public
-		this.name = name || this.constructor.name
-		this.item = new Group()
-		this.scenes = {}
-		this.components = {}
-		this.holdDuration = 1000
-		this.disabledFn = []
-		this.ignoredFn = []
+    // Public
+    this.name = name || this.constructor.name
+    this.item = new Group()
+    this.scenes = {}
+    this.components = {}
+    this.holdDuration = 1000
+    this.disabledFn = []
+    this.ignoredFn = []
 
-		// Events
-		this.on('dispose', () => this.#onDispose())
-	}
+    // Events
+    this.on('dispose', () => this.#onDispose())
+  }
 
-	/**
-	 * Set the name of the item
-	 * @param name Name of the item
-	 */
-	public set name(name: string) {
-		this.#name = name
-	}
+  /**
+   * Set the name of the item
+   * @param name Name of the item
+   */
+  public set name(name: string) {
+    this.#name = name
+  }
 
-	/**
-	 * Get the name of the item
-	 */
-	public get name() {
-		return this.#name
-	}
+  /**
+   * Get the name of the item
+   */
+  public get name() {
+    return this.#name
+  }
 
-	/**
-	 * Add a debug folder for a providen material
-	 * @param material Material to add debug to
-	 * @param options Options for the debug
-	 */
-	public addDebugMaterial(material: Material, options?: TMaterialDebugOptions) {
-		if (!this.debugFolder) this.#setDebugFolder()
+  /**
+   * Add a debug folder for a providen material
+   * @param material Material to add debug to
+   * @param options Options for the debug
+   */
+  public addDebugMaterial(material: Material, options?: TMaterialDebugOptions) {
+    if (!this.debugFolder) this.#setDebugFolder()
 
-		if (this.debugFolder) {
-			return new DebugMaterial(this.debugFolder, material, options)
-		}
-	}
+    if (this.debugFolder) {
+      return new DebugMaterial(this.debugFolder, material, options)
+    }
+  }
 
-	/**
-	 * Add debug to the item
-	 * @param target Target to add debug to
-	 */
-	public addDebug(
-		target: 'object3D' | 'material' | 'all' = 'all',
-		options?: TMaterialDebugOptions
-	) {
-		if (!this.debugFolder) this.#setDebugFolder()
+  /**
+   * Add debug to the item
+   * @param target Target to add debug to
+   */
+  public addDebug(
+    target: 'object3D' | 'material' | 'all' = 'all',
+    options?: TMaterialDebugOptions
+  ) {
+    if (!this.debugFolder) this.#setDebugFolder()
 
-		if (this.debugFolder) {
-			const added: string[] = []
-			switch (target) {
-				case 'object3D':
-					if (!added.includes(this.item.uuid)) {
-						added.push(this.item.uuid)
-						// this.addDebugObject3D(this.item)
-					}
+    if (this.debugFolder) {
+      const added: string[] = []
+      switch (target) {
+        case 'object3D':
+          if (!added.includes(this.item.uuid)) {
+            added.push(this.item.uuid)
+            // this.addDebugObject3D(this.item)
+          }
 
-					break
-				case 'material':
-					this.item.traverse((child) => {
-						if (child instanceof Mesh && !added.includes(child.material.uuid)) {
-							added.push(child.material.uuid)
-							this.addDebugMaterial(child.material, options)
-						}
-					})
-					break
-				case 'all':
-					this.addDebug('object3D', options)
-					this.addDebug('material', options)
-					break
-			}
-		}
-	}
+          break
+        case 'material':
+          this.item.traverse((child) => {
+            if (child instanceof Mesh && !added.includes(child.material.uuid)) {
+              added.push(child.material.uuid)
+              this.addDebugMaterial(child.material, options)
+            }
+          })
+          break
+        case 'all':
+          this.addDebug('object3D', options)
+          this.addDebug('material', options)
+          break
+      }
+    }
+  }
 
-	/**
-	 * Add CSS2D to the item
-	 * @param {ICSS2DRendererStore} item
-	 */
-	public addCSS2D(item: ICSS2DRendererStore) {
-		this.scene?.addCSS2D(item)
-	}
+  /**
+   * Add CSS2D to the item
+   * @param {ICSS2DRendererStore} item
+   */
+  public addCSS2D(item: ICSS2DRendererStore) {
+    this.scene?.addCSS2D(item)
+  }
 
-	/**
-	 * Add CSS3D to the item
-	 * @param {ICSS2DRendererStore} item
-	 */
-	public addCSS3D(item: ICSS2DRendererStore) {
-		this.scene?.addCSS3D(item)
-	}
+  /**
+   * Add CSS3D to the item
+   * @param {ICSS2DRendererStore} item
+   */
+  public addCSS3D(item: ICSS2DRendererStore) {
+    this.scene?.addCSS3D(item)
+  }
 
-	/**
-	 * Remove CSS2D element
-	 * @param {string} id
-	 */
-	public removeCSS2D(id: string) {
-		this.scene?.removeCSS2D(id)
-	}
+  /**
+   * Remove CSS2D element
+   * @param {string} id
+   */
+  public removeCSS2D(id: string) {
+    this.scene?.removeCSS2D(id)
+  }
 
-	/**
-	 * Remove CSS3D element
-	 * @param {string} id
-	 */
-	public removeCSS3D(id: string) {
-		this.scene?.removeCSS3D(id)
-	}
+  /**
+   * Remove CSS3D element
+   * @param {string} id
+   */
+  public removeCSS3D(id: string) {
+    this.scene?.removeCSS3D(id)
+  }
 
-	/**
-	 * Build instanced mesh
-	 * @param {BufferGeometry} geometry Geometry of the item
-	 * @param {TMaterial} material Material of the item
-	 * @param {any} list List of items to instance, with position and rotation
-	 * @returns {InstancedMesh} Instanced mesh
-	 */
-	public buildInstancedMesh(
-		geometry: BufferGeometry,
-		material: Material,
-		list: any[]
-	): InstancedMesh {
-		const item = new InstancedMesh(geometry, material, list.length)
+  /**
+   * Build instanced mesh
+   * @param {BufferGeometry} geometry Geometry of the item
+   * @param {TMaterial} material Material of the item
+   * @param {any} list List of items to instance, with position and rotation
+   * @returns {InstancedMesh} Instanced mesh
+   */
+  public buildInstancedMesh(
+    geometry: BufferGeometry,
+    material: Material,
+    list: any[]
+  ): InstancedMesh {
+    const item = new InstancedMesh(geometry, material, list.length)
 
-		const obj = new Object3D()
-		list.forEach((el, i) => {
-			if (el.position) {
-				obj.position.set(el.position.x, el.position.y, el.position.z)
-			}
+    const obj = new Object3D()
+    list.forEach((el, i) => {
+      if (el.position) {
+        obj.position.set(el.position.x, el.position.y, el.position.z)
+      }
 
-			if (el.rotation) {
-				obj.rotation.set(el.rotation.x, el.rotation.y, el.rotation.z)
-			}
+      if (el.rotation) {
+        obj.rotation.set(el.rotation.x, el.rotation.y, el.rotation.z)
+      }
 
-			if (el.scale) {
-				obj.scale.set(el.scale.x, el.scale.y, el.scale.z)
-			}
+      if (el.scale) {
+        obj.scale.set(el.scale.x, el.scale.y, el.scale.z)
+      }
 
-			obj.updateMatrix()
-			item.setMatrixAt(i, obj.matrix)
-		})
+      obj.updateMatrix()
+      item.setMatrixAt(i, obj.matrix)
+    })
 
-		item.instanceMatrix.needsUpdate = true
+    item.instanceMatrix.needsUpdate = true
 
-		return item
-	}
+    return item
+  }
 
-	/**
-	 * Set the debug folder of the item
-	 * @param folder Optionnal folder to append to
-	 */
-	#setDebugFolder() {
-		const folder = this.parent?.debugFolder || this.scene?.debugFolder
-		if (!folder) return
+  /**
+   * Set the debug folder of the item
+   * @param folder Optionnal folder to append to
+   */
+  #setDebugFolder() {
+    const folder = this.parent?.debugFolder || this.scene?.debugFolder
+    if (!folder) return
 
-		this.debugFolder = folder!.addFolder({
-			title: '👷🏻 Item - ' + (this.item.name || this.constructor.name),
-			expanded: false,
-		})
-	}
+    this.debugFolder = folder!.addFolder({
+      title: '👷🏻 Item - ' + (this.item.name || this.constructor.name),
+      expanded: false,
+    })
+  }
 
-	/**
-	 * Dispose the item
-	 */
-	#onDispose() {
-		// Dispose events
-		this.disposeEvents()
-	}
+  /**
+   * Dispose the item
+   */
+  #onDispose() {
+    // Dispose events
+    this.disposeEvents()
+  }
 }

@@ -2,6 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  ssr: true,
   css: ['@/assets/style/main.scss'],
 
   router: {
@@ -20,6 +21,9 @@ export default defineNuxtConfig({
       },
     },
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: ['three', 'three-msdf-text-utils'],
+    },
   },
 
   modules: [

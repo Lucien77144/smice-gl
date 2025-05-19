@@ -57,12 +57,22 @@ This will start the server on `http://localhost:3000`, where you can view your a
 
 ## Understanding Abstracts
 
-In the context of this template, **Abstracts** refer to reusable components or classes that encapsulate common functionality or behavior. They serve as a blueprint for creating more specific components or classes. Here’s how you can utilize abstracts in your project:
+In the context of this template, **Abstracts** refer to reusable components or classes that encapsulate common functionality or behavior. They serve as a blueprint for creating more specific components or classes. Here's how you can utilize abstracts in your project:
 
 - **Creating Abstract Components**: Define components that contain shared logic or UI elements. For example, you might create an abstract `Base3DObject` component that includes common properties and methods for all 3D objects in your application.
 - **Extending Abstracts**: Other components can extend these abstract components to inherit their functionality. This promotes code reuse and helps maintain a clean codebase.
 
 - **Example Usage**: If you have multiple 3D objects with similar behaviors, you can create an abstract class that defines those behaviors, and then create specific classes for each object type that extend the abstract class.
+
+## MSDF Font Generation
+
+To generate MSDF fonts for use with Three.js text rendering, use the following command:
+
+```bash
+msdf-bmfont -f json -m 512,512 -d 2 --pot --smart-size public/fonts/Nexa-Heavy.ttf -i public/fonts/charset.txt
+```
+
+Then rename the json file to `[name].font.json` to use the correct loader.
 
 ## Building for Production
 

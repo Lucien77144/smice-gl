@@ -3,7 +3,7 @@ import ExtendableScene from '../../Modules/Extendables/ExtendableScene'
 import type { Dictionary } from '~/models/functions/dictionary.model'
 import TransitionSlide from '~/webgl/Modules/Transitions/TransitionSlide/TransitionSlide'
 import { ShaderHomeBackground } from '~/webgl/Modules/Shaders/ShaderHomeBackground/ShaderHomeBackground'
-import SharedCube from '~/webgl/Items/SharedCube'
+import Title from './Items/Title'
 
 export default class HomeScene extends ExtendableScene<{
   shader: ShaderHomeBackground
@@ -17,7 +17,7 @@ export default class HomeScene extends ExtendableScene<{
     super()
     // Childs
     this.components = {
-      cube: new SharedCube(),
+      title: new Title(),
     }
 
     // Transition

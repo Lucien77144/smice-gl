@@ -20,6 +20,7 @@ type TOptions = {
 export default class Experience {
   // Static
   static instance?: Experience
+  static i18n: ReturnType<typeof useI18n>
 
   // Public
   public time!: Time
@@ -54,6 +55,11 @@ export default class Experience {
       return Experience.instance
     }
     Experience.instance = this
+
+    // Static
+    if (!Experience.i18n) {
+      Experience.i18n = useI18n() as unknown as ReturnType<typeof useI18n>
+    }
 
     // Check if canvas
     if (!canvas) {
